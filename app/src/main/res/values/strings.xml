@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">LaunchDarkly Client Inspector</string>
+    <string name="tab_title_client">Client</string>
+    <string name="tab_title_user">User</string>
+    <string name="tab_title_flags">Flags</string>
+    <string name="client_connection_status_label">Connection status:</string>
+    <string name="client_connection_status_online">ONLINE</string>
+    <string name="client_connection_status_offline">OFFLINE</string>
+    <string name="client_connection_status_message_label">Latest client message:</string>
+    <string name="client_mobile_key_label">Mobile Key:</string>
+    <string name="client_mobile_key_hint">mob-abc012...</string>
+    <string name="connect_button_text">Connect</string>
+    <string name="connect_button_connect_text">Connect</string>
+    <string name="connect_button_disconnect_text">Exit Inspector</string>
+    <string name="flag_button_action_text">Do Something</string>
+    <string name="user_catagory_builtin">Built-in</string>
+    <string name="user_attributes_builtin_key">Key: </string>
+    <string name="user_attributes_builtin_anonymous">Anonymous: </string>
+    <string name="user_attributes_builtin_email">E-mail: </string>
+    <string name="user_attributes_builtin_firstname">First name: </string>
+    <string name="user_attributes_builtin_lastname">Last name: </string>
+    <string name="user_attributes_builtin_name">Name: </string>
+    <string name="user_attributes_builtin_country">Country: </string>
+    <string name="user_catagory_custom">Custom</string>
+    <string name="user_button_apply">Apply</string>
+    <string name="flags_last_updated_label">"Last updated: "</string>
+</resources>
