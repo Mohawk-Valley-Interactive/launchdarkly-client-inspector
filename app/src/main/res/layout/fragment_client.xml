@@ -6,6 +6,8 @@
 
     <data>
 
+        <import type="android.view.View" />
+
         <variable
             name="clientViewModel"
             type="com.launchdarkly.android.clientinspector.viewmodel.LdClientViewModel" />
@@ -31,13 +33,13 @@
                 android:id="@+id/clientMobileKey"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:enabled="@{!clientViewModel.isOnline}"
+                android:enabled="@{!clientViewModel.isClientOnline}"
                 android:inputType="textPersonName"
                 android:text="@={clientViewModel.mobileKey}" />
 
             <Button
                 android:id="@+id/connect_toggle_button"
-                isOnline="@{clientViewModel.isOnline}"
+                isOnline="@{clientViewModel.isClientOnline}"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="@{() -> clientViewModel.onConnectionToggleClicked()}"
@@ -59,7 +61,7 @@
                         android:text="@string/client_connection_status_label" />
 
                     <TextView
-                        isOnline="@{clientViewModel.isOnline}"
+                        isOnline="@{clientViewModel.isClientOnline}"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingLeft="10dp"
@@ -67,6 +69,48 @@
                 </TableRow>
 
             </TableLayout>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?android:attr/listDivider" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="10dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="Example Usage"
+                    android:textSize="24dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@={clientViewModel.exampleDescriptionText}" />
+
+                <Button
+                    android:id="@+id/flagged_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:onClick="@{(view) -> clientViewModel.onExampleButtonClicked(view)}"
+                    android:text="@={clientViewModel.exampleButtonText}"
+                    exampleButtonVisibility="@{clientViewModel.isExampleButtonVisible}" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

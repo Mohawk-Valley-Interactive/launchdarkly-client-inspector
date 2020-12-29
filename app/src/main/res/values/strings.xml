@@ -24,4 +24,11 @@
     <string name="user_catagory_custom">Custom</string>
     <string name="user_button_apply">Apply</string>
     <string name="flags_last_updated_label">"Last updated: "</string>
+    <string name="client_example_title">Example Content</string>
+
+    <string name="client_example_show_button_flag_name">show-example-button</string>
+    <string name="client_example_button_text_flag_name">example-button-text</string>
+    <string name="client_example_description">A boolean flag named %1$s in the connected environment will show a button below. A string flag named %2$s determines the text in the button. Try it!</string>
+    <string name="client_example_button_default_text">Click Me!</string>
+    <string name="client_example_button_toast_text">Now you\'ve not only changed the visibility of a button but an aspect of it\'s visuals as well!</string>
 </resources>

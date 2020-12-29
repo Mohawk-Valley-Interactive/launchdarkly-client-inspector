@@ -3,11 +3,14 @@ package com.launchdarkly.android.clientinspector.model;
 
 import android.app.Activity;
 import android.app.Application;
+import android.content.res.Resources;
+import android.graphics.Color;
 import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
 
 import com.launchdarkly.android.ConnectionInformation;
+import com.launchdarkly.android.FeatureFlagChangeListener;
 import com.launchdarkly.android.LDAllFlagsListener;
 import com.launchdarkly.android.LDClient;
 import com.launchdarkly.android.LDConfig;
@@ -15,6 +18,7 @@ import com.launchdarkly.android.LDFailure;
 import com.launchdarkly.android.LDStatusListener;
 import com.launchdarkly.android.LDUser;
 import com.launchdarkly.android.clientinspector.MainActivity;
+import com.launchdarkly.android.clientinspector.R;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -23,34 +27,10 @@ import java.util.Map;
 
 public class LdClientModel {
 
-    // Static
-    public static LdClientModel getInstance() {
-        if (instance == null) {
-            instance = new LdClientModel();
-        }
-
-        return instance;
-    }
-
-    public static void setDefaultMobileKey(String mobileKey) {
-        defaultMobileKey = mobileKey;
-    }
-
-    public static void registerApplication(Application a) {
-        application = a;
-    }
-
-    public static void registerActivity(MainActivity a) {
-        activity = a;
-    }
-
     private static Activity activity = null;
     private static LdClientModel instance = null;
     private static Application application = null;
     private static String defaultMobileKey = "";
-
-    // Non-static
-    protected LDClient ldClient = null;
 
     public MutableLiveData<Map<String, ?>> flagList = new MutableLiveData<>();
     public MutableLiveData<String> lastUpdated = new MutableLiveData<>("NOT UPDATED YET");
@@ -80,9 +60,55 @@ public class LdClientModel {
     public MutableLiveData<Boolean> userCustom3IsPrivate = new MutableLiveData<>(false);
     public MutableLiveData<String> userCustom3Name = new MutableLiveData<>("");
     public MutableLiveData<String> userCustom3Val = new MutableLiveData<>("");
+    public MutableLiveData<Boolean> exampleShowButton = new MutableLiveData<>(false);
+    public MutableLiveData<Integer> exampleHeadingColor = new MutableLiveData<>(Color.BLACK);
+    public MutableLiveData<String> exampleButtonText = new MutableLiveData<>("unset");
+    public MutableLiveData<String> exampleDescriptionText = new MutableLiveData<>("unset");
+
+    protected LDClient ldClient = null;
 
     private LdClientModel() {
         mobileKey.postValue(defaultMobileKey);
+
+        Resources res = application.getResources();
+        exampleDescriptionText.postValue(
+                res.getString(R.string.client_example_description,
+                res.getString(R.string.client_example_show_button_flag_name),
+                res.getString(R.string.client_example_button_text_flag_name))
+        );
+
+        boolean isShowingButton = res.getBoolean(R.bool.example_button_is_showing_default);
+        exampleShowButton.postValue(ldClient != null ?
+                ldClient.boolVariation(res.getString(R.string.client_example_show_button_flag_name), isShowingButton) :
+                isShowingButton
+        );
+
+        String defaultButtonText = res.getString(R.string.client_example_button_default_text);
+        exampleButtonText.postValue(ldClient != null ?
+                ldClient.stringVariation(res.getString(R.string.client_example_button_text_flag_name), defaultButtonText) :
+                defaultButtonText
+        );
+    }
+
+    // Static
+    public static LdClientModel getInstance() {
+        if (instance == null) {
+            instance = new LdClientModel();
+        }
+
+        return instance;
+    }
+
+    public static void setDefaultMobileKey(String mobileKey) {
+        defaultMobileKey = mobileKey;
+    }
+
+    public static void registerApplication(Application a) {
+        application = a;
+    }
+
+    public static void registerActivity(MainActivity a) {
+        activity = a;
     }
 
     public void updateUser() {
@@ -102,24 +128,24 @@ public class LdClientModel {
                 android.os.Process.killProcess(android.os.Process.myPid());
 
             } catch (IOException e) {
-                Log.e("LaunchDarklyClientManager", "Failed to close the client with the following error: " + e.getMessage());
+                Log.e("LDClientManager", "Failed to close the client with the following error: " + e.getMessage());
             }
         }
     }
 
     public void initializeLdClientConnection() {
         if (application == null) {
-            Log.e("LaunchDarklyClientManager", "Application not registered. Please remember to register application before calling init.");
+            Log.e("LDClientManager", "Application not registered. Please remember to register application before calling init.");
             return;
         }
 
         if (ldClient != null && ldClient.isInitialized()) {
-            Log.w("LaunchDarklyClientManager", "Initialize called on initialized client; closing existing connection before re-initializing.");
+            Log.w("LDClientManager", "Initialize called on initialized client; closing existing connection before re-initializing.");
             try {
                 ldClient.close();
                 isOnline.postValue(false);
             } catch (IOException e) {
-                Log.e("LaunchDarklyClientManager", "Failed to close ldClient during initialization (" + e.getLocalizedMessage() + "). Aborting initialization.");
+                Log.e("LDClientManager", "Failed to close ldClient during initialization (" + e.getLocalizedMessage() + "). Aborting initialization.");
                 e.printStackTrace();
             }
         }
@@ -146,11 +172,30 @@ public class LdClientModel {
                     lastUpdated.postValue(new Timestamp(System.currentTimeMillis()).toString());
                 }
             });
+
             isOnline.postValue(true);
             flagList.postValue(ldClient.allFlags());
             lastConnectedOrigin.postValue(mobileKey.getValue());
             lastUpdated.postValue(new Timestamp(System.currentTimeMillis()).toString());
             statusMessage.postValue("Client initialized.");
+
+            final Resources res = application.getResources();
+
+            ldClient.registerFeatureFlagListener(res.getString(R.string.client_example_show_button_flag_name), new FeatureFlagChangeListener() {
+                @Override
+                public void onFeatureFlagChange(String flagKey) {
+                    exampleShowButton.postValue(
+                            ldClient.boolVariation(flagKey, res.getBoolean(R.bool.example_button_is_showing_default))
+                    );
+                }
+            });
+
+            ldClient.registerFeatureFlagListener(res.getString(R.string.client_example_button_text_flag_name), new FeatureFlagChangeListener() {
+                @Override
+                public void onFeatureFlagChange(String flagKey) {
+                    exampleButtonText.postValue(ldClient.stringVariation(flagKey, res.getString(R.string.client_example_button_default_text)));
+                }
+            });
         } else {
             isOnline.postValue(false);
             statusMessage.postValue("Initialization failed.");
@@ -158,7 +203,7 @@ public class LdClientModel {
     }
 
     private LDConfig getConfig() {
-        Log.i("LaunchDarklyClientManager", "Connecting to: " + mobileKey.getValue());
+        Log.i("LDClientManager", "Connecting to: " + mobileKey.getValue());
         return new LDConfig.Builder().setMobileKey(mobileKey.getValue()).build();
     }
 
@@ -325,10 +370,7 @@ public class LdClientModel {
 
     private boolean isBoolean(String value) {
         String asLower = value.toLowerCase();
-        if (asLower.contains("t") || asLower.contains("f") || asLower.equals("true") || asLower.equals("false")) {
-            return true;
-        }
-        return false;
+        return asLower.contains("t") || asLower.contains("f") || asLower.equals("true") || asLower.equals("false");
     }
 
 }

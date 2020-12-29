@@ -1,8 +1,11 @@
 package com.launchdarkly.android.clientinspector.viewmodel;
 
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.databinding.BindingAdapter;
 import androidx.lifecycle.LiveData;
@@ -26,23 +29,41 @@ public class LdClientViewModel extends ViewModel {
         textView.setText(b ? R.string.client_connection_status_online : R.string.client_connection_status_offline);
     }
 
-    public LiveData<String> clientConnectionStatusMessage;
-    public LiveData<Boolean> isOnline;
+    @BindingAdapter("exampleButtonVisibility")
+    public static void setExampleButtonVisibility(Button button, Boolean b) {
+        button.setVisibility(b ? View.VISIBLE : View.GONE);
+    }
+
+    public LiveData<Boolean> isClientOnline;
+    public LiveData<Boolean> isExampleButtonVisible;
+    public LiveData<Color> headingColor;
+    public MutableLiveData<String> exampleButtonText;
+    public MutableLiveData<String> exampleDescriptionText;
     public MutableLiveData<String> mobileKey;
 
     public LdClientViewModel() {
         ldClientModel = LdClientModel.getInstance();
 
-        isOnline = ldClientModel.isOnline;
+        isClientOnline = ldClientModel.isOnline;
         mobileKey = ldClientModel.mobileKey;
+
+        exampleButtonText = ldClientModel.exampleButtonText;
+        exampleDescriptionText = ldClientModel.exampleDescriptionText;
+        isExampleButtonVisible = ldClientModel.exampleShowButton;
     }
 
     public void onConnectionToggleClicked() {
-        if (isOnline.getValue()) {
+        if (isClientOnline.getValue()) {
             ldClientModel.disconnectLdClientConnection();
         } else {
             ldClientModel.initializeLdClientConnection();
         }
+    }
+
+    public void onExampleButtonClicked(View view) {
+        Resources res = view.getResources();
+        String message = res.getString(R.string.client_example_button_toast_text );
+        Toast.makeText(view.getContext(), message, Toast.LENGTH_LONG).show();
     }
 
     protected LdClientModel ldClientModel;
